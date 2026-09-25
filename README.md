@@ -136,6 +136,8 @@ That writes the saved bearer into the MCP config for Cursor (`~/.cursor/mcp.json
 
 `--local` writes them into the current project. `--client cursor` writes only one client. The MCP URL is `https://whop-apps-gateway.vercel.app/mcp`.
 
+`install` is optional. A host given only that URL signs in by itself through the gateway's MCP OAuth. A bearer in the host config skips that sign-in.
+
 ## Develop
 
 ```bash

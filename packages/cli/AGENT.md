@@ -2,7 +2,7 @@
 
 You own **only** `packages/cli`. Scaffolds a Whop app so workstream B's SDK can be mounted. Not a runtime.
 
-App authors run this on their laptop (`init` / `validate`). Grok Bot and Claude do **not** use it at runtime.
+App authors run this on their laptop (`init` / `validate`). Admins can use it to test the gateway. Hosts such as Cursor, Grok, and Claude do **not** use it at runtime.
 
 ## Goal
 
@@ -17,13 +17,17 @@ Laptop test client (same binary, any OS with Node 20):
 
 ```
 whop-apps-gateway login [--url https://whop-apps-gateway.vercel.app] [--bearer sess_…] [--no-open]
+whop-apps-gateway status
 whop-apps-gateway discover [--query text]
+whop-apps-gateway connect --app-id app_xxx
 whop-apps-gateway actions --app-id app_xxx
 whop-apps-gateway invoke --app-id app_xxx --action ping [--args '{}']
 whop-apps-gateway install [--client cursor|claude|codex|all] [--local]
 ```
 
-`login` opens `/oauth/authorize` with a localhost redirect. After Whop approval the gateway sends only the opaque `sess_` bearer back to that local URL, and the CLI stores it in `~/.whop-apps-gateway/session.json`. `install` writes that bearer into Cursor (`~/.cursor/mcp.json`), Claude Code (`~/.claude.json`), and Codex (`~/.codex/config.toml`). `--local` writes the project files instead.
+`login` opens `/oauth/authorize` with a localhost redirect and prints that URL on stderr while it waits. After Whop approval the gateway sends only the opaque `sess_` bearer back to that local URL, and the CLI stores it in `~/.whop-apps-gateway/session.json`. `connect` calls `create_connection`; run it once per app before `actions` or `invoke`.
+
+`install` writes that bearer into Cursor (`~/.cursor/mcp.json`), Claude Code (`~/.claude.json`), and Codex (`~/.codex/config.toml`). `--local` writes the project files instead. Hosts can also sign in with the URL alone through the gateway's MCP OAuth. A bearer written by `install` skips that sign-in, so remove it from the host config to let the host log in on its own.
 
 `init` writes:
 
