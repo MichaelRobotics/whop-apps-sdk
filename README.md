@@ -24,9 +24,22 @@ Do not install the CLI here. Do not add a Claude, Cursor, Codex, or Grok plugin.
 pnpm add github:MichaelRobotics/whop-apps-sdk#path:packages/app-sdk
 ```
 
-That install also fetches `@whop-apps-gateway/protocol` from this same repo and compiles it. Do not install protocol from npm.
+The protocol is already compiled into this package. Do not `pnpm add` or `npm install` `@whop-apps-gateway/protocol`. Nothing is published to npm yet, so that name returns 404. `npm` and `yarn` cannot install a subfolder of this repo. `dist` is already committed, so install must not run a build. pnpm 11 rejects git packages that run `prepare`, and it rejects a second git dependency inside this package.
 
-The compiled `dist` is already in this repo, so install does not need a build step. These paths must be on the public origin Whop lists as `hosted_url`, at the root, with no extra prefix:
+## What agents get wrong
+
+- This app is not an MCP server and not a Claude, Cursor, Codex, or Grok plugin. Do not add a Skill file. The gateway calls this app.
+- Do not install `packages/cli` in the app. The CLI runs on each admin's computer.
+- Next.js has no Express server. Use `createWhopGatewayHandlers` below. `mountWhopGateway` is only for an existing Express app.
+- `appId` must be the Whop app id (`app_…`). The gateway drops the app when the well-known `app_id` does not match.
+- `publicBaseUrl` must be the app's own public host, such as `https://your-app.vercel.app`. The well-known `invoke` field is `{publicBaseUrl}/gateway/invoke`, and that is the URL the gateway POSTs to.
+- Do not set `publicBaseUrl` to `https://….apps.whop.com`. Whop's proxy removes the `Authorization` header before forwarding, so invoke through that host always returns 401.
+- Whop often leaves `hosted_url` null for an app you host yourself. The gateway then probes `origin`. The well-known file must still be reachable on that origin. Invoke still goes to `publicBaseUrl`, not to `origin`.
+- The `name` in this document can differ from the name on the Whop app record. Whop's name is what the gateway lists.
+- Map the whole app. One action per real capability. Do not stop at `ping` and `get`.
+- A company paywall stays in this app. `ctx.token` is that admin's Whop access token. Resolve their company and allow the action only when that company has paid. Each admin has their own CLI session. The gateway does not know which company paid.
+
+These routes must exist at the root of both the Whop `origin` (so discovery can read the manifest) and `publicBaseUrl` (so invoke receives the bearer):
 
 Express apps call `mountWhopGateway(app, options)` or `createWhopGatewayApp`. Next.js apps use `createWhopGatewayHandlers` and export the handlers from App Router routes. There is no Express server to mount:
 
@@ -58,7 +71,7 @@ import { whopGateway } from "@/lib/whop-gateway";
 export const POST = whopGateway.invoke;
 ```
 
-These paths must be on the public origin Whop lists as `hosted_url`, at the root, with no extra prefix:
+Serve these paths with no extra prefix:
 
 - `GET /.well-known/whop-gateway.json`
 - `GET /gateway/actions`
@@ -77,7 +90,7 @@ const { app } = createWhopGatewayApp({
 });
 ```
 
-`appId` is the Whop app id. `publicBaseUrl` is the public origin Whop will list. Map the whole app: one action per real capability, not only `ping` and `get`.
+`appId` is the Whop app id. `publicBaseUrl` is the app's own host, the one that receives `Authorization`. Map the whole app: one action per real capability, not only `ping` and `get`.
 
 Each action needs:
 
@@ -89,9 +102,7 @@ Each action needs:
 
 Do not set `expectedToken` in production. Do not log or return `ctx.token`.
 
-A company paywall stays in this app. On each invoke, resolve the admin from `ctx.token`, find their Whop company, and run the action only when that company has paid. Each admin still has their own CLI session.
-
-Deploy so Whop’s app record shows this deployment as `hosted_url`.
+A company paywall stays in this app. On each invoke, resolve the admin from `ctx.token`, find their Whop company, and run the action only when that company has paid. Each admin still has their own CLI session. Whop may leave `hosted_url` empty. That is expected for an app you host yourself.
 
 ## CLI and MCP
 
