@@ -73,24 +73,28 @@ describe("cli connect", () => {
       return new Response(JSON.stringify({ tool: name, ok: true }), { status: 200 });
     };
     const discover = await runConnect(["discover", "--query", "sample"], { home: dir, fetchFn });
+    const connect = await runConnect(["connect", "--app-id", "app_sample_1"], { home: dir, fetchFn });
     const actions = await runConnect(["actions", "--app-id", "app_sample_1"], { home: dir, fetchFn });
     const invoke = await runConnect(
       ["invoke", "--app-id", "app_sample_1", "--action", "ping", "--args", "{}"],
       { home: dir, fetchFn },
     );
     assert.equal(discover.code, 0);
+    assert.equal(connect.code, 0);
     assert.equal(actions.code, 0);
     assert.equal(invoke.code, 0);
     assert.deepEqual(
       seen.map((call) => call.url),
       [
         "https://gateway.test/tools/discover_apps",
+        "https://gateway.test/tools/create_connection",
         "https://gateway.test/tools/app_actions",
         "https://gateway.test/tools/app_invoke",
       ],
     );
     assert.ok(seen.every((call) => call.authorization === "Bearer sess_user_a"));
-    assert.deepEqual(seen[2]?.body, { app_id: "app_sample_1", action: "ping", arguments: {} });
+    assert.deepEqual(seen[1]?.body, { app_id: "app_sample_1" });
+    assert.deepEqual(seen[3]?.body, { app_id: "app_sample_1", action: "ping", arguments: {} });
   });
 
   it("writes Cursor, Claude Code, and Codex config without dropping other servers", () => {

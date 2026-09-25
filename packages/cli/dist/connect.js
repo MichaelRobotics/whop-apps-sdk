@@ -6,7 +6,7 @@ import { dirname, join } from "node:path";
 import { TOOLS_HTTP_PATH } from "./protocol.js";
 export const DEFAULT_GATEWAY = "https://whop-apps-gateway.vercel.app";
 export const SERVER_NAME = "whop-apps-gateway";
-const CONNECT_COMMANDS = new Set(["login", "status", "discover", "actions", "invoke", "install"]);
+const CONNECT_COMMANDS = new Set(["login", "status", "discover", "connect", "actions", "invoke", "install"]);
 const BEARER_RE = /sess_[A-Za-z0-9_-]+/;
 const CODEX_BEGIN = "# whop-apps-gateway begin";
 const CODEX_END = "# whop-apps-gateway end";
@@ -139,6 +139,7 @@ export function helpText() {
     return `whop-apps-gateway login [--url ${DEFAULT_GATEWAY}] [--bearer sess_…] [--no-open]
 whop-apps-gateway status
 whop-apps-gateway discover [--query text]
+whop-apps-gateway connect --app-id app_xxx
 whop-apps-gateway actions --app-id app_xxx
 whop-apps-gateway invoke --app-id app_xxx --action ping [--args '{}']
 whop-apps-gateway install [--client cursor|claude|codex|all] [--local]
@@ -316,6 +317,13 @@ export async function runConnect(argv, io = {}) {
         if (query)
             args.query = query;
         const result = await callTool(session, "discover_apps", args, fetchFn);
+        return jsonResult(result.status, result.body);
+    }
+    if (cmd === "connect") {
+        const appId = parsed.get("app-id");
+        if (!appId)
+            return fail("connect requires --app-id app_xxx");
+        const result = await callTool(session, "create_connection", { app_id: appId }, fetchFn);
         return jsonResult(result.status, result.body);
     }
     if (cmd === "actions") {
