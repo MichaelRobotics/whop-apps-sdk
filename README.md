@@ -125,6 +125,8 @@ pnpm exec whop-apps-gateway invoke --app-id app_xxx --action ping
 
 `login` opens `https://whop-apps-gateway.vercel.app/oauth/authorize` and saves the opaque `sess_…` bearer when the browser returns to this machine. The same commands work on Linux, macOS, and Windows.
 
+`whop-apps-gateway status` prints the gateway's `connection_status` JSON. `requested_oauth_scopes` is the list the authorize URL asked for. It is not the Whop app permissions on the access token. `company:basic:read` is enabled on the gateway OAuth app `app_Q3Bqx2H1H8qqLq` in the Whop dashboard. Whop enforces that permission when the app calls `companies.list` with `ctx.token`. The app SDK does not need a change for that.
+
 ```bash
 pnpm exec whop-apps-gateway install
 ```
