@@ -1,4 +1,7 @@
 import type { Express, NextFunction, Request, Response } from "express";
+
+type WebRequest = globalThis.Request;
+type WebResponse = globalThis.Response;
 import express from "express";
 import AjvModule from "ajv";
 import type { Options, ValidateFunction } from "ajv";
@@ -163,6 +166,90 @@ function invokeArguments(body: { arguments?: Record<string, unknown>; path?: str
 
 function formatSchemaErrors(validate: ValidateFunction): string {
   return ajv.errorsText(validate.errors, { separator: "; " });
+}
+
+function headerRecord(headers: globalThis.Headers): Record<string, string | undefined> {
+  const record: Record<string, string | undefined> = {};
+  headers.forEach((value, key) => {
+    record[key] = value;
+  });
+  return record;
+}
+
+function jsonResponse(status: number, body: unknown): WebResponse {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { "content-type": "application/json" },
+  });
+}
+
+export type WhopGatewayHandlers = {
+  wellKnown: (request: WebRequest) => Promise<WebResponse>;
+  actions: (request: WebRequest) => Promise<WebResponse>;
+  invoke: (request: WebRequest) => Promise<WebResponse>;
+};
+
+/** Fetch handlers for Next.js App Router and any host that uses the Web Request API. */
+export function createWhopGatewayHandlers(options: CreateWhopGatewayAppOptions): WhopGatewayHandlers {
+  const catalog = catalogFor(options);
+  const actions = registeredActions(options);
+  const validators = new Map<string, ValidateFunction>();
+  for (const [name, def] of Object.entries(actions)) {
+    validators.set(name, ajv.compile(def.inputSchema));
+  }
+
+  return {
+    async wellKnown(request) {
+      const url = new URL(request.url);
+      const hostBase = url.origin;
+      const useHost = !options.publicBaseUrl || /:0(?:\/|$)/.test(options.publicBaseUrl);
+      return jsonResponse(200, capabilityFor({ ...options, publicBaseUrl: useHost ? hostBase : options.publicBaseUrl }));
+    },
+    async actions() {
+      return jsonResponse(200, catalog);
+    },
+    async invoke(request) {
+      const headers = headerRecord(request.headers);
+      if (!isGatewayRequest(headers)) {
+        return jsonResponse(401, { ok: false, error: `Missing ${HEADER_GATEWAY}: ${HEADER_GATEWAY_VALUE}` });
+      }
+      const token = bearerToken(headers);
+      if (!token || (options.expectedToken && token !== options.expectedToken)) {
+        return jsonResponse(401, { ok: false, error: token ? "Invalid access token" : "Missing Authorization Bearer" });
+      }
+      const body = (await request.json().catch(() => null)) as unknown;
+      const parsed = InvokeRequestSchema.safeParse(body);
+      if (!parsed.success) {
+        return jsonResponse(400, { ok: false, app_id: options.appId, action: "", error: parsed.error.message });
+      }
+      const { action, path } = parsed.data;
+      const handler = actions[action];
+      if (!handler) {
+        return jsonResponse(404, { ok: false, app_id: options.appId, action, error: `Unknown action: ${action}` });
+      }
+      const args = invokeArguments(parsed.data);
+      const validate = validators.get(action);
+      if (validate && !validate(args)) {
+        return jsonResponse(400, {
+          ok: false,
+          app_id: options.appId,
+          action,
+          error: `Invalid arguments: ${formatSchemaErrors(validate)}`,
+        });
+      }
+      try {
+        const data = await handler.handler(args, { token, path });
+        return jsonResponse(200, { ok: true, app_id: options.appId, action, data });
+      } catch (err) {
+        return jsonResponse(500, {
+          ok: false,
+          app_id: options.appId,
+          action,
+          error: err instanceof Error ? err.message : String(err),
+        });
+      }
+    },
+  };
 }
 
 export function mountWhopGateway(app: Express, options: CreateWhopGatewayAppOptions): Capability {

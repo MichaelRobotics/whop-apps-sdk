@@ -21,11 +21,44 @@ Install this in a Whop app. It is `packages/app-sdk`.
 Do not install the CLI here. Do not add a Claude, Cursor, Codex, or Grok plugin. Do not add a Skill file. This app is not an MCP server. The gateway calls this app.
 
 ```bash
-pnpm add github:MichaelRobotics/whop-apps-sdk#path:packages/protocol
 pnpm add github:MichaelRobotics/whop-apps-sdk#path:packages/app-sdk
 ```
 
-If the app already has an HTTP server, call `mountWhopGateway(app, options)` on that server. Otherwise use `createWhopGatewayApp` and listen. These paths must be on the public origin Whop lists as `hosted_url`, at the root, with no extra prefix:
+That install also fetches `@whop-apps-gateway/protocol` from this same repo and compiles it. Do not install protocol from npm.
+
+`pnpm add` runs `prepare`, which compiles `dist`. These paths must be on the public origin Whop lists as `hosted_url`, at the root, with no extra prefix.
+
+Express apps call `mountWhopGateway(app, options)` or `createWhopGatewayApp`. Next.js apps use `createWhopGatewayHandlers` and export the handlers from App Router routes. There is no Express server to mount:
+
+```ts
+// lib/whop-gateway.ts
+import { createWhopGatewayHandlers } from "@whop-apps-gateway/app-sdk";
+
+export const whopGateway = createWhopGatewayHandlers({
+  appId: "app_xxx",
+  name: "The app name",
+  publicBaseUrl: "https://the-public-url-whop-lists",
+  actions: {
+    // one entry per thing this app can do
+  },
+});
+```
+
+```ts
+// app/.well-known/whop-gateway.json/route.ts
+import { whopGateway } from "@/lib/whop-gateway";
+export const GET = whopGateway.wellKnown;
+
+// app/gateway/actions/route.ts
+import { whopGateway } from "@/lib/whop-gateway";
+export const GET = whopGateway.actions;
+
+// app/gateway/invoke/route.ts
+import { whopGateway } from "@/lib/whop-gateway";
+export const POST = whopGateway.invoke;
+```
+
+These paths must be on the public origin Whop lists as `hosted_url`, at the root, with no extra prefix:
 
 - `GET /.well-known/whop-gateway.json`
 - `GET /gateway/actions`
