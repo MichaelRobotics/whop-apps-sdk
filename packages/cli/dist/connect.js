@@ -3,7 +3,7 @@ import { createServer } from "node:http";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
-import { TOOLS_HTTP_PATH } from "@whop-apps-gateway/protocol";
+import { TOOLS_HTTP_PATH } from "./protocol.js";
 export const DEFAULT_GATEWAY = "https://whop-apps-gateway.vercel.app";
 export const SERVER_NAME = "whop-apps-gateway";
 const CONNECT_COMMANDS = new Set(["login", "status", "discover", "actions", "invoke", "install"]);

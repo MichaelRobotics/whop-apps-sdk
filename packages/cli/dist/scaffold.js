@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { ACTIONS_PATH, GATEWAY_NAME, INVOKE_PATH, PROTOCOL_VERSION, WELL_KNOWN_PATH, parseCatalog, safeParseCapability, safeParseCatalog, } from "@whop-apps-gateway/protocol";
+import { ACTIONS_PATH, GATEWAY_NAME, INVOKE_PATH, PROTOCOL_VERSION, WELL_KNOWN_PATH, parseCatalog, safeParseCapability, safeParseCatalog, } from "./protocol.js";
 export const WELL_KNOWN_RELATIVE_PATH = join(".well-known", "whop-gateway.json");
 export const CATALOG_RELATIVE_PATH = join("gateway", "actions.json");
 const pingAction = {

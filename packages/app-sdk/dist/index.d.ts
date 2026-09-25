@@ -1,7 +1,7 @@
 import type { Express, NextFunction, Request, Response } from "express";
 type WebRequest = globalThis.Request;
 type WebResponse = globalThis.Response;
-import { type Capability, type Catalog, type JsonSchema } from "@whop-apps-gateway/protocol";
+import { type Capability, type Catalog, type JsonSchema } from "./protocol.js";
 export type AppActionHandler = (args: Record<string, unknown>, ctx: {
     token: string;
     path?: string;

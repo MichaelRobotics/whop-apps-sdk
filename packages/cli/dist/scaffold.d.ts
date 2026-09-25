@@ -1,4 +1,4 @@
-import { type Catalog } from "@whop-apps-gateway/protocol";
+import { type Catalog } from "./protocol.js";
 export declare const WELL_KNOWN_RELATIVE_PATH: string;
 export declare const CATALOG_RELATIVE_PATH: string;
 export type InitOptions = {

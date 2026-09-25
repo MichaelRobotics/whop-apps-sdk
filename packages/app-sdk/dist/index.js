@@ -1,6 +1,6 @@
 import express from "express";
 import AjvModule from "ajv";
-import { ACTIONS_PATH, HEADER_GATEWAY, HEADER_GATEWAY_VALUE, HEALTH_PATH, INVOKE_PATH, InvokeRequestSchema, MCP_PATH, WELL_KNOWN_PATH, bearerToken, isGatewayRequest, parseCapability, parseCatalog, } from "@whop-apps-gateway/protocol";
+import { ACTIONS_PATH, HEADER_GATEWAY, HEADER_GATEWAY_VALUE, HEALTH_PATH, INVOKE_PATH, InvokeRequestSchema, MCP_PATH, WELL_KNOWN_PATH, bearerToken, isGatewayRequest, parseCapability, parseCatalog, } from "./protocol.js";
 /** NodeNext types Ajv's CJS default as the module namespace; runtime is the constructor. */
 const Ajv = (AjvModule.default ??
     AjvModule);
