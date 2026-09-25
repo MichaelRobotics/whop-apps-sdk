@@ -1,0 +1,33 @@
+{
+  "app_id": "app_sample",
+  "actions": [
+    {
+      "name": "ping",
+      "title": "Ping",
+      "description": "Check that the app is reachable and the gateway session is authorized.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "destructive": false
+    },
+    {
+      "name": "get",
+      "title": "Get",
+      "description": "Fetch a resource by path when you need a document the app exposes.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Resource path"
+          }
+        },
+        "required": ["path"],
+        "additionalProperties": false
+      },
+      "destructive": false
+    }
+  ]
+}

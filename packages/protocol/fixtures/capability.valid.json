@@ -1,0 +1,9 @@
+{
+  "gateway": "whop-apps-gateway",
+  "version": "1",
+  "app_id": "app_sample",
+  "name": "Sample Whop App",
+  "mcp": "http://127.0.0.1:8791/mcp",
+  "invoke": "http://127.0.0.1:8791/gateway/invoke",
+  "auth": "whop-oauth"
+}

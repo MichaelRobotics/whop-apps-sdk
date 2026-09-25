@@ -1,0 +1,19 @@
+{
+  "name": "whop-apps-sdk",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Protocol, app SDK, and CLI for the Whop Apps Gateway",
+  "author": "Michał Nowakowski / Michael Software",
+  "license": "MIT",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build -w @whop-apps-gateway/protocol && npm run build -w @whop-apps-gateway/app-sdk && npm run build -w @whop-apps-gateway/cli",
+    "test": "npm run test -w @whop-apps-gateway/protocol && npm run build -w @whop-apps-gateway/protocol && npm run test -w @whop-apps-gateway/app-sdk && npm run build -w @whop-apps-gateway/app-sdk && npm run test -w @whop-apps-gateway/cli && npm run build -w @whop-apps-gateway/cli",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

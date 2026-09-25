@@ -1,0 +1,30 @@
+{
+  "name": "@whop-apps-gateway/cli",
+  "version": "0.1.0",
+  "publishConfig": { "access": "public" },
+  "files": ["dist"],
+  "repository": { "type": "git", "url": "git+https://github.com/MichaelRobotics/whop-apps-sdk.git", "directory": "packages/cli" },
+  "type": "module",
+  "description": "Scaffold a Whop app, log in to the gateway, and write MCP client config",
+  "license": "MIT",
+  "bin": {
+    "whop-apps-gateway": "./dist/cli.js"
+  },
+  "exports": {
+    "./scaffold": {
+      "types": "./dist/scaffold.d.ts",
+      "import": "./dist/scaffold.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "tsx --test src/cli.test.ts src/connect.test.ts"
+  },
+  "dependencies": {
+    "@whop-apps-gateway/protocol": "0.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.0",
+    "tsx": "^4.19.0",
+    "typescri

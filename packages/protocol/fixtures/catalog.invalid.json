@@ -1,0 +1,11 @@
+{
+  "app_id": "app_sample",
+  "actions": [
+    {
+      "name": "ping",
+      "title": "Ping",
+      "inputSchema": "not-a-json-schema",
+      "destructive": "no"
+    }
+  ]
+}
