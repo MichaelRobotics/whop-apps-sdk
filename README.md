@@ -26,7 +26,7 @@ pnpm add github:MichaelRobotics/whop-apps-sdk#path:packages/app-sdk
 
 That install also fetches `@whop-apps-gateway/protocol` from this same repo and compiles it. Do not install protocol from npm.
 
-`pnpm add` runs `prepare`, which compiles `dist`. These paths must be on the public origin Whop lists as `hosted_url`, at the root, with no extra prefix.
+The compiled `dist` is already in this repo, so install does not need a build step. These paths must be on the public origin Whop lists as `hosted_url`, at the root, with no extra prefix:
 
 Express apps call `mountWhopGateway(app, options)` or `createWhopGatewayApp`. Next.js apps use `createWhopGatewayHandlers` and export the handlers from App Router routes. There is no Express server to mount:
 
